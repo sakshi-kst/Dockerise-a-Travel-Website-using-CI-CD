@@ -32,18 +32,6 @@ jobs:
             docker tag sakshi-capstone $dockerpath
             docker push $dockerpath
 
-  scan-docker-image:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 20.10.7
-      - run:
-          name: Scan Docker image for vulnerabilities
-          command: |
-            docker scan sakshikst/sakshi-capstone
-
   deploy-to-k8s:
     docker:
       - image:  amazon/aws-cli
@@ -97,10 +85,8 @@ workflows:
       - lint-dockerfile
       - build-upload-docker-image:
           requires: [lint-dockerfile]
-      - scan-docker-image:
-          requires: [build-upload-docker-image]
       - deploy-to-k8s:
-          requires: [scan-docker-image]
+          requires: [build-upload-docker-image]
       - smoke-test:
           requires: [deploy-to-k8s]
       - rollout:
