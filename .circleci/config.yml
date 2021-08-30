@@ -37,6 +37,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 20.10.7
       - run:
           name: Scan Docker image for vulnerabilities
           command: |
