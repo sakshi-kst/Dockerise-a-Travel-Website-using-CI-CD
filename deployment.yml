@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sakshi-capstone
+  labels:
+    app: sakshi-capstone
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sakshi-capstone
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 60
+  progressDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app: sakshi-capstone
+    spec:
+      containers:
+        - name: sakshi-capstone
+          image: sakshikst/sakshi-capstone
+          ports:
+          - containerPort: 80
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              scheme: HTTP
+              port: 80
+            successThreshold: 1
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sakshi-capstone
+spec:
+  type: LoadBalancer
+  selector:
+    app: sakshi-capstone
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

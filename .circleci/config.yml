@@ -1,0 +1,105 @@
+version: 2.1
+            
+jobs:
+  lint-dockerfile:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Lint Dockerfile
+          command: |
+            sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
+            sudo chmod +x /bin/hadolint
+            cd ~/project/
+            sudo hadolint Dockerfile
+
+  build-upload-docker-image:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.7
+      - run:
+          name: Build and Upload Docker image
+          command: |
+            docker build --tag=sakshi-capstone .
+            docker image ls
+            dockerpath=sakshikst/sakshi-capstone
+            docker login -u sakshikst -p $password
+            echo "Docker ID and Image: $dockerpath"
+            docker tag sakshi-capstone $dockerpath
+            docker push $dockerpath
+
+  scan-docker-image:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Scan Docker image for vulnerabilities
+          command: |
+            docker scan sakshikst/sakshi-capstone
+
+  deploy-to-k8s:
+    docker:
+      - image:  amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Deploy image to Kubernetes
+          command: |
+            aws eks --region us-east-2 update-kubeconfig --name sakshiudacity
+            curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x ./kubectl
+            mv ./kubectl /usr/local/bin/kubectl
+            kubectl config use-context arn:aws:eks:us-east-2:035491818280:cluster/sakshiudacity 
+            kubectl apply -f ~/project/deployment.yml
+            kubectl get nodes
+            kubectl get deployments
+            kubectl get pod -o wide
+            kubectl get service/sakshi-capstone
+
+  smoke-test:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Smoke test
+          command: |
+            URL="http://a70a7bb46cea246819cf5768a225814b-1902548512.us-east-2.elb.amazonaws.com:80"
+            if curl ${URL} | grep "Travelopedia"
+            then
+              echo "Smoke Test is successful: Website is up!"
+              return 0  
+            else
+              echo "Unable to access website."
+              return 1
+            fi
+
+  rollout:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Rollout app
+          command: |
+            kubectl rollout status deployments/udacityproject
+
+workflows:
+  default:
+    jobs:
+      - lint-dockerfile
+      - build-upload-docker-image:
+          requires: [lint-dockerfile]
+      - scan-docker-image:
+          requires: [build-upload-docker-image]
+      - deploy-to-k8s:
+          requires: [scan-docker-image]
+      - smoke-test:
+          requires: [deploy-to-k8s]
+      - rollout:
+          requires: [smoke-test]
