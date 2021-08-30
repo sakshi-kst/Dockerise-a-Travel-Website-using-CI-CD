@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/sakshi-kst/Dockerise-a-Stock-Price-App-using-CI-CD/tree/master.svg?style=svg)](https://circleci.com/gh/sakshi-kst/Dockerise-a-Stock-Price-App-using-CI-CD/tree/master)
+[![CircleCI](https://circleci.com/gh/sakshi-kst/Dockerise-a-Travel-Website-using-CI-CD/tree/master.svg?style=svg)](https://circleci.com/gh/sakshi-kst/Dockerise-a-Travel-Website-using-CI-CD/tree/master)
 
 ## Udacity Cloud DevOps Engineer Nanodegree: Capstone Project
 
