@@ -80,6 +80,8 @@ jobs:
             curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
             chmod +x ./kubectl
             mv ./kubectl /usr/local/bin/kubectl
+            kubectl config use-context arn:aws:eks:us-east-2:035491818280:cluster/sakshiudacity 
+            kubectl apply -f ~/project/deployment.yml
             kubectl rollout status deployments/sakshi-capstone
 
 workflows:
