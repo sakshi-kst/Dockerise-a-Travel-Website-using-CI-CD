@@ -40,6 +40,7 @@ jobs:
       - run:
           name: Scan Docker image for vulnerabilities
           command: |
+            sudo apt install docker-scan-plugin
             docker scan sakshikst/sakshi-capstone
 
   deploy-to-k8s:
