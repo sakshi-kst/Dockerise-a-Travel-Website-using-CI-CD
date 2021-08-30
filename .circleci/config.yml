@@ -59,7 +59,7 @@ jobs:
       - run:
           name: Smoke test
           command: |
-            URL="http://aed946ca9a6524233b4dbd50de08423f-1230434006.us-east-2.elb.amazonaws.com:80"
+            URL="http://aed946ca9a6524233b4dbd50de08423f-1230434006.us-est-2.elb.amazonaws.com:80"
             if curl -s ${URL} | grep "Travelopedia"
             then
               echo "Smoke Test is successful: Website is up!"
@@ -77,6 +77,9 @@ jobs:
       - run:
           name: Rollout app
           command: |
+            curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x ./kubectl
+            mv ./kubectl /usr/local/bin/kubectl
             kubectl rollout status deployments/udacityproject
 
 workflows:
