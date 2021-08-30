@@ -60,10 +60,10 @@ jobs:
           name: Smoke test
           command: |
             URL="http://aed946ca9a6524233b4dbd50de08423f-1230434006.us-east-2.elb.amazonaws.com:80"
-            if curl ${URL} | grep "Travelopedia"
+            if curl -s ${URL} | grep "Travelopedia"
             then
               echo "Smoke Test is successful: Website is up!"
-              return 0  
+              return 0
             else
               echo "Unable to access website."
               return 1
