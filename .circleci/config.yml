@@ -42,7 +42,6 @@ jobs:
       - run:
           name: Scan Docker image for vulnerabilities
           command: |
-            docker pull snyk/snyk-cli
             docker scan sakshikst/sakshi-capstone
 
   deploy-to-k8s:
